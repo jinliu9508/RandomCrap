@@ -11,12 +11,13 @@
 #include "scheduler.h"
 
 //Define your data structure here.
-	/*
-	*
-	*
-	*
-	*
-	*/
+struct ThreadsStatus {
+	ThreadDescriptorBlock *thread;
+	bool isScheduled;
+	unsigned int CPU_id;
+	ThreadsStatus *next;
+};
+
 
 class MyScheduler: public Scheduler {
 public:
@@ -25,10 +26,6 @@ public:
 	void CreateThread(int arriving_time, int remaining_time, int priority, int tid) override; //Function to create threads and insert them in student defined data structure
 
 	//Declare additional methods(s) below if needed.
-	/*
-	*
-	*
-	*
-	*
-	*/
+	ThreadsStatus *threadList = NULL;
+	void addThreadToList(ThreadDescriptorBlock*);
 };
