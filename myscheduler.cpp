@@ -21,8 +21,6 @@ void MyScheduler::CreateThread(int arriving_time, int remaining_time, int priori
 bool MyScheduler::Dispatch()
 {
 	//Todo: Check and remove finished threads
-	//Todo: Check if all the threads are finished; if so, return false
-	bool allFinished = true;
 	ThreadsStatus *iterator = threadList;
 	ThreadDescriptorBlock *thr;
 	while (iterator != NULL) {
@@ -30,11 +28,10 @@ bool MyScheduler::Dispatch()
 		if (thr->remaining_time == 0) {
 			removeThreadFromList(thr->tid);
 		}
-		else {
-			allFinished = false;
-		}
 	}
-	if (allFinished == true)
+
+	//Todo: Check if all the threads are finished; if so, return false
+	if (threadList == NULL)
 		return false;
 	
 
@@ -65,7 +62,7 @@ void MyScheduler::addThreadToList(ThreadDescriptorBlock *t) {
 		threadList = new ThreadsStatus;
 		threadList->thread = t;
 		threadList->isScheduled = false;
-		threadList->CPU_id = -1;
+		threadList->CPU_id = 0;
 		threadList->next = NULL;
 	}
 	else {		// add the thread to the end
@@ -74,7 +71,7 @@ void MyScheduler::addThreadToList(ThreadDescriptorBlock *t) {
 			iterator = iterator->next;
 		iterator->thread = t;
 		iterator->isScheduled = false;
-		iterator->CPU_id = -1;
+		iterator->CPU_id = 0;
 		iterator->next = NULL;
 	}
 }
