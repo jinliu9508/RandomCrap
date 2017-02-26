@@ -12,10 +12,16 @@
 
 //Define your data structure here.
 struct ThreadsStatus {
-	ThreadDescriptorBlock *thread;
-	bool isScheduled;
-	unsigned int CPU_id;
-	ThreadsStatus *next;
+	ThreadDescriptorBlock *thread;		// thread pointer
+	bool isScheduled;					// whether in queue or already scheduled
+	unsigned int CPU_id;				// if scheduled, record the id of CPU that handles this thread
+	ThreadsStatus *next;				// linked list, point to next thread
+};
+
+struct CPUStatus {
+	unsigned int id;					// id of CPU
+	bool isBusy;						// is there thread is processing in this CPU
+	unsigned int proccessedTid;			// if there is, what is the id of the thread
 };
 
 
@@ -26,6 +32,6 @@ public:
 	void CreateThread(int arriving_time, int remaining_time, int priority, int tid) override; //Function to create threads and insert them in student defined data structure
 
 	//Declare additional methods(s) below if needed.
-	ThreadsStatus *threadList = NULL;
-	void addThreadToList(ThreadDescriptorBlock*);
+	ThreadsStatus *threadList = NULL;					// initialize the thread list
+	void addThreadToList(ThreadDescriptorBlock*);		// add a thread to the list
 };
