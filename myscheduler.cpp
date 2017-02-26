@@ -22,6 +22,22 @@ bool MyScheduler::Dispatch()
 {
 	//Todo: Check and remove finished threads
 	//Todo: Check if all the threads are finished; if so, return false
+	bool allFinished = true;
+	ThreadsStatus *iterator = threadList;
+	ThreadDescriptorBlock *thr;
+	while (iterator != NULL) {
+		thr = iterator->thread;
+		if (thr->remaining_time == 0) {
+			removeThreadFromList(thr->tid);
+		}
+		else {
+			allFinished = false;
+		}
+	}
+	if (allFinished == true)
+		return false;
+	
+
 	switch(policy)
 	{
 		case FCFS:		//First Come First Serve
@@ -46,9 +62,10 @@ bool MyScheduler::Dispatch()
 void MyScheduler::addThreadToList(ThreadDescriptorBlock *t) {
 	// initialize the list if empty
 	if (threadList == NULL) {
+		threadList = new ThreadsStatus;
 		threadList->thread = t;
 		threadList->isScheduled = false;
-		threadList->CPU_id = 0;
+		threadList->CPU_id = -1;
 		threadList->next = NULL;
 	}
 	else {		// add the thread to the end
@@ -57,7 +74,12 @@ void MyScheduler::addThreadToList(ThreadDescriptorBlock *t) {
 			iterator = iterator->next;
 		iterator->thread = t;
 		iterator->isScheduled = false;
-		iterator->CPU_id = 0;
+		iterator->CPU_id = -1;
 		iterator->next = NULL;
 	}
+}
+
+// remove thread in the threadlist that has id of tid
+void removeThreadFromList(unsigned int tid) {
+
 }
