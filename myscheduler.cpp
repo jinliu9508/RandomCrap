@@ -6,6 +6,16 @@ void MyScheduler::CreateThread(int arriving_time, int remaining_time, int priori
 {
 	//Function to Create Thread(s) and insert them in the student
 	//defined data structure
+
+	// create a thread using passed in values
+	ThreadDescriptorBlock *t;
+	t->arriving_time = arriving_time;
+	t->remaining_time = remaining_time;
+	t->priority = priority;
+	t->tid = tid;
+
+	// add newly created thread to the list
+	addThreadToList(t);
 }
 
 bool MyScheduler::Dispatch()
@@ -31,4 +41,23 @@ bool MyScheduler::Dispatch()
 			throw 0;
 	}
 	return true;
+}
+
+void MyScheduler::addThreadToList(ThreadDescriptorBlock *t) {
+	// initialize the list if empty
+	if (threadList == NULL) {
+		threadList->thread = t;
+		threadList->isScheduled = false;
+		threadList->CPU_id = 0;
+		threadList->next = NULL;
+	}
+	else {		// add the thread to the end
+		ThreadsStatus *iterator = threadList;
+		while (iterator != NULL)
+			iterator = iterator->next;
+		iterator->thread = t;
+		iterator->isScheduled = false;
+		iterator->CPU_id = 0;
+		iterator->next = NULL;
+	}
 }
