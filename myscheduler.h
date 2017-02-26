@@ -23,9 +23,8 @@ struct CPUStatus {
 	bool isBusy;						// is there thread is processing in this CPU
 	unsigned int proccessedTid;			// if there is, what is the id of the thread
 
-	// constructor
-	CPUStatus(unsigned int num_CPU) {
-		for (int i = 0; i < num_CPU; i++) {
+	CPUStatus(unsigned int num_cpu) {
+		for (int i = 0; i < num_cpu; i++) {
 
 		}
 	}
