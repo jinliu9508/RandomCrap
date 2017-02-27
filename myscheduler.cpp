@@ -2,6 +2,19 @@
 /*Define all the functions in 'myschedule.h' here.*/
 #include "myscheduler.h"
 
+MyScheduler::MyScheduler(Policy p, unsigned int n) : Scheduler(p, n) {
+	// initialize the data structure
+	threadList = NULL;
+	for (int i = 0; i < num_cpu; i++) {
+		CPUList[i].id = i;
+		CPUList[i].isBusy = false;
+		CPUList[i].proccessedTid = 0;
+	}
+}
+
+MyScheduler::~MyScheduler() {
+
+}
 
 void MyScheduler::CreateThread(int arriving_time, int remaining_time, int priority, int tid) //Thread ID not Process ID
 {
@@ -34,25 +47,25 @@ bool MyScheduler::Dispatch()
 	//Todo: Check if all the threads are finished; if so, return false
 	if (threadList == NULL)
 		return false;
-	
 
-	switch(policy)
+
+	switch (policy)
 	{
-		case FCFS:		//First Come First Serve
+	case FCFS:		//First Come First Serve
 
-			break;
-		case STRFwoP:	//Shortest Time Remaining First, without preemption
+		break;
+	case STRFwoP:	//Shortest Time Remaining First, without preemption
 
-			break;
-		case STRFwP:	//Shortest Time Remaining First, with preemption
+		break;
+	case STRFwP:	//Shortest Time Remaining First, with preemption
 
-			break;
-		case PBS:		//Priority Based Scheduling, with preemption
+		break;
+	case PBS:		//Priority Based Scheduling, with preemption
 
-			break;
-		default :
-			cout<<"Invalid policy!";
-			throw 0;
+		break;
+	default:
+		cout << "Invalid policy!";
+		throw 0;
 	}
 	return true;
 }
@@ -78,6 +91,6 @@ void MyScheduler::addThreadToList(ThreadDescriptorBlock *t) {
 }
 
 // remove thread in the threadlist that has id of tid
-void removeThreadFromList(unsigned int tid) {
+void MyScheduler::removeThreadFromList(unsigned int tid) {
 
 }
