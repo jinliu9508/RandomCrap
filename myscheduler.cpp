@@ -7,6 +7,7 @@ MyScheduler::MyScheduler(Policy p, unsigned int n) : Scheduler(p, n) {
 	// initialize the data structure
 	threadVector.clear();
 	CPUList = new CPUStatus[num_cpu];
+	num_scheduledCPU = 0;
 	for (unsigned int i = 0; i < num_cpu; i++) {		// clear out the array of CPU indicator
 		CPUList[i].id = i;
 		CPUList[i].isBusy = false;
@@ -25,8 +26,7 @@ void MyScheduler::CreateThread(int arriving_time, int remaining_time, int priori
 	//Function to Create Thread(s) and insert them in the student
 	//defined data structure
 
-	cout << "Start adding thread #" << tid << " into the vector.";
-	// create a thread using passed in values
+	// create a thread using passed-in values
 	ThreadDescriptorBlock t;
 	t.arriving_time = arriving_time;
 	t.remaining_time = remaining_time;
@@ -38,16 +38,21 @@ void MyScheduler::CreateThread(int arriving_time, int remaining_time, int priori
 	thread.thread = &t;
 	thread.isScheduled = false;
 	thread.CPU_id = 0;
-	thread.next = NULL;
 
 	threadVector.push_back(thread);
 
 	// send message
-	cout << "Thread #" << tid << " has been added.\n";
+	cout << "	*** Thread #" << tid << " has been created.\n";
 }
 
 bool MyScheduler::Dispatch()
 {
+	while (!threadVector.empty() && num_scheduledCPU <= num_cpu) {
+		push_to_ordered_list(threadVector.begin);
+		threadVector.erase(threadVector.begin);
+		cout << "	*** Thread #" << threadVector.begin()->thread->tid << " has been scheduled.\n";
+	}
+
 
 	//Todo: Check and remove finished threads
 	if (!orderedVector.empty()) {
@@ -63,7 +68,7 @@ bool MyScheduler::Dispatch()
 	if (orderedVector.empty()) {
 		return false;
 	}
-		
+
 
 	switch (policy)
 	{
@@ -102,7 +107,7 @@ void MyScheduler::push_to_ordered_list(ThreadsStatus thread) {
 	switch (policy)
 	{
 	case FCFS:		//First Come First Serve
-		
+
 		break;
 	case STRFwoP:	//Shortest Time Remaining First, without preemption
 
