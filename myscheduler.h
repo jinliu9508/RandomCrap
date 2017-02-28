@@ -36,6 +36,10 @@ public:
 
 	//Declare additional methods(s) below if needed.
 	vector<ThreadsStatus> threadVector;
+	vector<ThreadsStatus> orderedVector;
 	CPUStatus *CPUList;							// declare the CPU status list
 
+	void push_to_ordered_list(ThreadsStatus thread);
+	unsigned int getAvailableCPUIndex();
+	void free_CPU(unsigned int tid);
 };
