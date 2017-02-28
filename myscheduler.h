@@ -9,6 +9,7 @@ declaration in this file, define in 'myschedule.cpp')
 which they might find helpful.*/
 
 #include "scheduler.h"
+#include <vector>
 
 //Define your data structure here.
 struct ThreadsStatus {
@@ -34,8 +35,7 @@ public:
 
 
 	//Declare additional methods(s) below if needed.
-	ThreadsStatus *threadList;					// declare and initialize the thread list
-	CPUStatus *CPUList = new CPUStatus[num_cpu];
-	void addThreadToList(ThreadDescriptorBlock*);		// add a thread to the list
-	void removeThreadFromList(unsigned int tid);
+	vector<ThreadsStatus> threadVector;
+	CPUStatus *CPUList;							// declare the CPU status list
+
 };
