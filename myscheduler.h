@@ -16,12 +16,13 @@ struct ThreadsStatus {
 	ThreadDescriptorBlock *thread;		// thread pointer
 	bool isScheduled;					// whether in queue or already scheduled
 	unsigned int CPU_id;				// if scheduled, record the id of CPU that handles this thread
+	bool isRunning;						// true if thread is currently being processed by a cpu
 };
 
 struct CPUStatus {
 	unsigned int id;					// id of CPU
 	bool isBusy;						// is there thread is processing in this CPU
-	unsigned int proccessedTid;			// if there is, what is the id of the thread
+	unsigned int processedTid;			// if there is, what is the id of the thread
 };
 
 
@@ -39,7 +40,7 @@ public:
 	CPUStatus *CPUList;							// declare the CPU status list
 	unsigned int num_scheduledCPU;				// used for checking available cpu
 
-	void push_to_ordered_list(ThreadsStatus thread);	
+	void push_to_ordered_list(ThreadsStatus *thread);	
 	unsigned int getAvailableCPUIndex();
 	void free_CPU(unsigned int tid);
 };
