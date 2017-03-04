@@ -34,13 +34,11 @@ public:
 	void CreateThread(int arriving_time, int remaining_time, int priority, int tid) override; //Function to create threads and insert them in student defined data structure
 
 
-	//Declare additional methods(s) below if needed.
+	// variables
 	vector<ThreadsStatus> threadVector;
 	vector<ThreadsStatus> orderedVector;
-	CPUStatus *CPUList;							// declare the CPU status list
 	unsigned int num_scheduledCPU;				// used for checking available cpu
 
-	void push_to_ordered_list(ThreadsStatus *thread);	
-	unsigned int getAvailableCPUIndex();
-	void free_CPU(unsigned int tid);
+	// additional functions
+	void push_to_ordered_list(ThreadsStatus *thread);
 };
