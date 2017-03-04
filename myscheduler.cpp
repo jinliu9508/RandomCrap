@@ -1,24 +1,31 @@
 //myschedule.cpp
 /*Define all the functions in 'myschedule.h' here.*/
+
+
+/* 
+	Group members: Ghunley Zhang, Jinwei Liu, Kevin Jiang
+	Date last modified: 3/4/2017
+	Due: 3/5/2017 11:59pm
+
+	Description: In this project we implement a schduler for a n-processor architecture.
+		It would work for four policies, FCFS, SRTFwoP, SRTFwP, and PBSwP. 
+*/
+
 #include "myscheduler.h"
 
 // constructor
 MyScheduler::MyScheduler(Policy p, unsigned int n) : Scheduler(p, n) {
 	// initialize the data structure
 	threadVector.clear();
-	CPUList = new CPUStatus[num_cpu];
 	num_scheduledCPU = 0;
 	for (unsigned int i = 0; i < num_cpu; i++) {		// clear out the array of CPU indicator
-		CPUList[i].id = i;
-		CPUList[i].isBusy = false;
-		CPUList[i].processedTid = 0;
+		CPUs[i] = NULL;
 	}
 }
 
 // destructor
 MyScheduler::~MyScheduler() {
 	threadVector.clear();
-	delete CPUList;
 }
 
 void MyScheduler::CreateThread(int arriving_time, int remaining_time, int priority, int tid) //Thread ID not Process ID
@@ -50,7 +57,7 @@ void MyScheduler::CreateThread(int arriving_time, int remaining_time, int priori
 	threadVector.insert(it, 1, *thread);
 
 	// send message
-	cout << "*** Thread #" << tid << " has been created. \n" << "\tArrival: " << arriving_time << "\tRemaining: " << remaining_time << "\tPriority: " << priority << endl << endl;
+	//cout << "*** Thread #" << tid << " has been created. \n" << "\tArrival: " << arriving_time << "\tRemaining: " << remaining_time << "\tPriority: " << priority << endl << endl;
 
 	return;
 }
@@ -60,41 +67,19 @@ bool MyScheduler::Dispatch()
 	// iterate through thread vector and schedule threads
 	while (!threadVector.empty() && threadVector[0].thread->arriving_time <= timer) {
 		push_to_ordered_list(&threadVector[0]);
-		cout << "	*** Thread #" << threadVector[0].thread->tid << " has been scheduled.\n";
+		//cout << "	*** Thread #" << threadVector[0].thread->tid << " has been scheduled.\n";
 		threadVector.erase(threadVector.begin());
-		
+
 	}
 
-
-	/*
 	//Todo: Check and remove finished threads
-	if (!orderedVector.empty()) {
-		for (auto it = begin(orderedVector); it != end(orderedVector); ++it) {	// loop through the vector
-			if (it->thread->remaining_time == 0) {
-				orderedVector.erase(it);		// evict if a thread that has done processes (Remaining time = 0)
-				free_CPU(it->thread->tid);
-				cout << "The thread #" << it->thread->tid << " has done processing and removed from the vector.\n";
-			}
-		}
-	}
-	*/
-
 	//Todo: Check if all the threads are finished; if so, return false
-	//if (orderedVector.empty()) {
-	//	return false;
-	//}
 
 	switch (policy)	{
+
 	case FCFS: {		//First Come First Serve
 		// iterate through cpus
 		for (int i = 0; i < num_cpu; i++) {
-
-			//if (CPUs[i] != NULL) {
-			//	cout << "CPU " << i << "\tThread ID: " << CPUs[i]->tid << " Remaining: " << CPUs[i]->remaining_time << endl;
-			//}
-			//else {
-			//	cout << "CPU " << i << ": null" << endl;
-			//}
 
 			if (CPUs[i] == NULL || CPUs[i]->remaining_time == 0) {
 				//cout << "CPU " << i << " is free" << endl;
@@ -112,7 +97,6 @@ bool MyScheduler::Dispatch()
 
 				// assign processor to next available thread in ordered vector;
 				if (it != orderedVector.end()) {
-					//cout << "CPU " << i << "\ttid: " << it->thread->tid << endl;
 					CPUs[i] = it->thread;
 					it->isRunning = true;
 				}
@@ -123,6 +107,7 @@ bool MyScheduler::Dispatch()
 		}
 		break;
 	}
+
 	case STRFwoP: {	//Shortest Time Remaining First, without preemption
 		// iterate through cpus
 		for (int i = 0; i < num_cpu; i++) {
@@ -151,6 +136,7 @@ bool MyScheduler::Dispatch()
 		}
 		break;
 	}
+
 	case STRFwP: {	//Shortest Time Remaining First, with preemption
 		auto it = orderedVector.begin();
 
@@ -178,6 +164,7 @@ bool MyScheduler::Dispatch()
 
 		break;
 	}
+
 	case PBS: {		//Priority Based Scheduling, with preemption
 		auto it = orderedVector.begin();
 
@@ -205,6 +192,7 @@ bool MyScheduler::Dispatch()
 
 		break;
 	}
+
 	default:
 		cout << "Invalid policy!";
 		throw 0;
@@ -217,12 +205,6 @@ bool MyScheduler::Dispatch()
 void MyScheduler::push_to_ordered_list(ThreadsStatus *thread) {
 	// find a proper place in the vector to push the thread based on policyv
 	// vector head gets to process first, followed by the second item, etc.
-
-	// get available CPU number; if none, send a message and return
-	//if (unsigned int availableCPU = getAvailableCPUIndex() == NULL) {
-	//	cout << "All CPUs are currently busy.\n";
-	//	return;
-	//}
 
 	switch (policy)
 	{
@@ -272,23 +254,3 @@ void MyScheduler::push_to_ordered_list(ThreadsStatus *thread) {
 	return;
 
 }
-
-unsigned int MyScheduler::getAvailableCPUIndex() {
-	for (unsigned int i = 0; i < num_cpu; i++) {		// find nearest CPU that is not busy
-		if (CPUList[i].isBusy == false) {
-			return i;
-		}
-	}
-	return NULL;
-}
-
-void MyScheduler::free_CPU(unsigned int tid) {
-	// free the CPU that is currently processing tid
-	for (unsigned int i = 0; i < num_cpu; i++) {
-		if (CPUList[i].processedTid == tid) {
-			CPUList[i].isBusy = false;
-			CPUList[i].processedTid = 0;
-		}
-	}
-}
-
