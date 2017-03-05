@@ -55,21 +55,25 @@ void MyScheduler::CreateThread(int arriving_time, int remaining_time, int priori
 	}
 
 	threadVector.insert(it, 1, *thread);
-
 	// send message
 	//cout << "*** Thread #" << tid << " has been created. \n" << "\tArrival: " << arriving_time << "\tRemaining: " << remaining_time << "\tPriority: " << priority << endl << endl;
+	
 
 	return;
 }
 
 bool MyScheduler::Dispatch()
 {
+	
 	// iterate through thread vector and schedule threads
 	while (!threadVector.empty() && threadVector[0].thread->arriving_time <= timer) {
 		push_to_ordered_list(&threadVector[0]);
 		//cout << "	*** Thread #" << threadVector[0].thread->tid << " has been scheduled.\n";
 		threadVector.erase(threadVector.begin());
-
+		// send message
+		//cout << "*** Thread #" << tid << " has been created. \n" << "\tArrival: " << arriving_time << "\tRemaining: " << remaining_time << "\tPriority: " << priority << endl << endl;
+		
+		cout << endl;
 	}
 
 	//Todo: Check and remove finished threads
@@ -137,6 +141,7 @@ bool MyScheduler::Dispatch()
 	}
 
 	case STRFwP: {	//Shortest Time Remaining First, with preemption
+
 		auto it = orderedVector.begin();
 
 		// assign first n threads in ordered vector to a cpu
@@ -160,14 +165,14 @@ bool MyScheduler::Dispatch()
 						CPUs[i] = it->thread;
 						it->isRunning = true;
 					}
-					
+
 					else {	// preemption
 						// find the thread status that contains CPUs[i] thread
 						auto iter = orderedVector.begin();
 						while (iter->thread != CPUs[i] && iter != orderedVector.end()) {
 							iter++;
 						}
-
+						cout << " thread #" << it->thread->tid << " is preempted.\n";
 						iter->isRunning = false;	// turn off the status of the evict thread
 						CPUs[i] = it->thread;
 						it->isRunning = true;
@@ -251,26 +256,24 @@ void MyScheduler::push_to_ordered_list(ThreadsStatus *thread) {
 		break;
 	}
 	case STRFwP: {	//Shortest Time Remaining First, with preemption
-		bool inserted = false;
 
-		// find first thread with greater remaining time
-		while (it != orderedVector.end() && it->thread->remaining_time <= thread->thread->remaining_time) {
-			if (it->isRunning && it != orderedVector.begin())	// preemption
-			{
-				orderedVector.insert(it-1, 1, *thread);
-				inserted = true;
-				break;
-			}
-			else {
-				it++;
-			}
-				
+		// find first thread with greater remaining time in ordered vector that is not currently running
+		while (it != orderedVector.end() 
+			&& it->thread->remaining_time + it->thread->arriving_time <= thread->thread->remaining_time + thread->thread->arriving_time) {
+			it++;
 		}
 
-		// insert thread in front of thread with greater remaining time
-		if (!inserted)
-			orderedVector.insert(it, 1, *thread);
+		orderedVector.insert(it, *thread);
 
+		/* // check the vector order for debug
+		auto itera = orderedVector.begin();
+		cout << "\tthread order: ";
+		while (itera != orderedVector.end()) {
+			cout << itera->thread->tid << " ";
+			itera++;
+		}
+		cout << endl;
+		*/
 		break;
 	}
 	case PBS: {		//Priority Based Scheduling, with preemption
