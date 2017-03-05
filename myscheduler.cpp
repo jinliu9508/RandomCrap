@@ -80,6 +80,7 @@ bool MyScheduler::Dispatch()
 	case FCFS: {		//First Come First Serve
 		// iterate through cpus
 		for (unsigned int i = 0; i < num_cpu; i++) {
+			// an empty CPU is found
 			if (CPUs[i] == NULL || CPUs[i]->remaining_time == 0) {
 				auto it = orderedVector.begin();
 
@@ -140,18 +141,43 @@ bool MyScheduler::Dispatch()
 
 		// assign first n threads in ordered vector to a cpu
 		for (unsigned int i = 0; i < num_cpu; i++) {
-			while (it != orderedVector.end() && it->thread->remaining_time == 0) {
-				it = orderedVector.erase(it);
+			// get next ready thread
+			it = orderedVector.begin();
+			while (it != orderedVector.end() && (it->thread->remaining_time == 0 || it->isRunning)) {
+				// remove from ordered vector if thread has been processed
+				if (it->thread->remaining_time == 0) {
+					it = orderedVector.erase(it);
+				}
+				else {	// move to next thread
+					it++;
+				}
 			}
 
+			// check if the CPU is able to be assigned to this thread
 			if (it != orderedVector.end()) {
-				CPUs[i] = it->thread;
-				it->isRunning = true;
-				it++;
+				if (CPUs[i] == NULL || CPUs[i]->remaining_time == 0 || CPUs[i]->remaining_time < it->thread->remaining_time) {
+					if (CPUs[i] == NULL || CPUs[i]->remaining_time == 0) {
+						CPUs[i] = it->thread;
+						it->isRunning = true;
+					}
+					
+					else {	// preemption
+						// find the thread status that contains CPUs[i] thread
+						auto iter = orderedVector.begin();
+						while (iter->thread != CPUs[i] && iter != orderedVector.end()) {
+							iter++;
+						}
+
+						iter->isRunning = false;	// turn off the status of the evict thread
+						CPUs[i] = it->thread;
+						it->isRunning = true;
+					}
+				}
 			}
 			else {
 				CPUs[i] = NULL;
 			}
+
 		}
 
 		// update running status of preempted threads
@@ -204,14 +230,18 @@ void MyScheduler::push_to_ordered_list(ThreadsStatus *thread) {
 	// find a proper place in the vector to push the thread based on policyv
 	// vector head gets to process first, followed by the second item, etc.
 
+	auto it = orderedVector.begin();
+
 	switch (policy)
 	{
 	case FCFS:		//First Come First Serve
-		orderedVector.push_back(*thread);
+		while (it != orderedVector.end() && (it->thread->arriving_time <= thread->thread->arriving_time || it->isRunning)) {
+			it++;
+		}
+
+		orderedVector.insert(it, *thread);
 		break;
 	case STRFwoP: {	//Shortest Time Remaining First, without preemption
-		auto it = orderedVector.begin();
-
 		// find first thread with greater remaining time in ordered vector that is not currently running
 		while (it != orderedVector.end() && (it->thread->remaining_time <= thread->thread->remaining_time || it->isRunning)) {
 			it++;
@@ -221,11 +251,10 @@ void MyScheduler::push_to_ordered_list(ThreadsStatus *thread) {
 		break;
 	}
 	case STRFwP: {	//Shortest Time Remaining First, with preemption
-		auto it = orderedVector.begin();
 		bool inserted = false;
 
 		// find first thread with greater remaining time
-		while (it != orderedVector.end() && it->thread->remaining_time < thread->thread->remaining_time) {
+		while (it != orderedVector.end() && it->thread->remaining_time <= thread->thread->remaining_time) {
 			if (it->isRunning && it != orderedVector.begin())	// preemption
 			{
 				orderedVector.insert(it-1, 1, *thread);
@@ -245,8 +274,6 @@ void MyScheduler::push_to_ordered_list(ThreadsStatus *thread) {
 		break;
 	}
 	case PBS: {		//Priority Based Scheduling, with preemption
-		auto it = orderedVector.begin();
-
 		// find first thread with lower priority
 		while (it != orderedVector.end() && it->thread->priority <= thread->thread->priority) {
 			it++;
