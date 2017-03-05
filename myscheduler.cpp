@@ -18,14 +18,14 @@ MyScheduler::MyScheduler(Policy p, unsigned int n) : Scheduler(p, n) {
 	// initialize the data structure
 	threadVector.clear();
 	num_scheduledCPU = 0;
-	for (unsigned int i = 0; i < num_cpu; i++) {		// clear out the array of CPU indicator
-		CPUs[i] = NULL;
-	}
+	clear_CPU();
 }
 
 // destructor
 MyScheduler::~MyScheduler() {
 	threadVector.clear();
+	orderedVector.clear();
+	clear_CPU();
 }
 
 void MyScheduler::CreateThread(int arriving_time, int remaining_time, int priority, int tid) //Thread ID not Process ID
@@ -79,10 +79,8 @@ bool MyScheduler::Dispatch()
 
 	case FCFS: {		//First Come First Serve
 		// iterate through cpus
-		for (int i = 0; i < num_cpu; i++) {
-
+		for (unsigned int i = 0; i < num_cpu; i++) {
 			if (CPUs[i] == NULL || CPUs[i]->remaining_time == 0) {
-				//cout << "CPU " << i << " is free" << endl;
 				auto it = orderedVector.begin();
 
 				while (it != orderedVector.end() && (it->thread->remaining_time == 0 || it->isRunning)) {
@@ -110,7 +108,7 @@ bool MyScheduler::Dispatch()
 
 	case STRFwoP: {	//Shortest Time Remaining First, without preemption
 		// iterate through cpus
-		for (int i = 0; i < num_cpu; i++) {
+		for (unsigned int i = 0; i < num_cpu; i++) {
 			if (CPUs[i] == NULL || CPUs[i]->remaining_time == 0) {
 				auto it = orderedVector.begin();
 
@@ -141,7 +139,7 @@ bool MyScheduler::Dispatch()
 		auto it = orderedVector.begin();
 
 		// assign first n threads in ordered vector to a cpu
-		for (int i = 0; i < num_cpu; i++) {
+		for (unsigned int i = 0; i < num_cpu; i++) {
 			while (it != orderedVector.end() && it->thread->remaining_time == 0) {
 				it = orderedVector.erase(it);
 			}
@@ -169,7 +167,7 @@ bool MyScheduler::Dispatch()
 		auto it = orderedVector.begin();
 
 		// assign first n threads in ordered vector to a cpu
-		for (int i = 0; i < num_cpu; i++) {
+		for (unsigned int i = 0; i < num_cpu; i++) {
 			while (it != orderedVector.end() && it->thread->remaining_time == 0) {
 				it = orderedVector.erase(it);
 			}
@@ -224,14 +222,26 @@ void MyScheduler::push_to_ordered_list(ThreadsStatus *thread) {
 	}
 	case STRFwP: {	//Shortest Time Remaining First, with preemption
 		auto it = orderedVector.begin();
+		bool inserted = false;
 
 		// find first thread with greater remaining time
-		while (it != orderedVector.end() && it->thread->remaining_time <= thread->thread->remaining_time) {
-			it++;
+		while (it != orderedVector.end() && it->thread->remaining_time < thread->thread->remaining_time) {
+			if (it->isRunning && it != orderedVector.begin())	// preemption
+			{
+				orderedVector.insert(it-1, 1, *thread);
+				inserted = true;
+				break;
+			}
+			else {
+				it++;
+			}
+				
 		}
 
 		// insert thread in front of thread with greater remaining time
-		orderedVector.insert(it, 1, *thread);
+		if (!inserted)
+			orderedVector.insert(it, 1, *thread);
+
 		break;
 	}
 	case PBS: {		//Priority Based Scheduling, with preemption
@@ -253,4 +263,10 @@ void MyScheduler::push_to_ordered_list(ThreadsStatus *thread) {
 
 	return;
 
+}
+
+void MyScheduler::clear_CPU() {
+	for (unsigned int i = 0; i < num_cpu; i++) {		// clear out the array of CPU indicator
+		CPUs[i] = NULL;
+	}
 }
