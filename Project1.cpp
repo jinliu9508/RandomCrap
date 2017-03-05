@@ -1,13 +1,16 @@
+// via : Jinwei Liu
+
 #include "myscheduler.h"
 #include <iostream>
 #include <stdlib.h>     /* srand, rand */
 
 int main(int argc, char* argv[])
 {
+	cout << "Test bench via: Jinwei Liu\n";
 
-	Policy policy = STRFwoP;			// replace policy: FCFS, STRFwoP, STRFwP, PBS
-	unsigned int CPU_num = 1;		// number of CPU
-	int thread_num = 10;	// number of thread to be scheduled
+	Policy policy = PBS;			// replace policy: FCFS, STRFwoP, STRFwP, PBS
+	unsigned int CPU_num = 2;		// number of CPU
+	int thread_num = 5;	// number of thread to be scheduled
 
 	MyScheduler scheduler(policy, CPU_num);
 
@@ -26,23 +29,23 @@ int main(int argc, char* argv[])
 	switch (policy)
 	{
 	case FCFS:
-		std::cout << "FCFS ";
+		cout << "FCFS ";
 		break;
 	case STRFwoP:
-		std::cout << "STRFwoP ";
+		cout << "STRFwoP ";
 		break;
 	case STRFwP:
-		std::cout << "STRFwP ";
+		cout << "STRFwP ";
 		break;
 	case PBS:
-		std::cout << "PBS " << std::endl;
+		cout << "PBS " << endl;
 		break;
 	default:
 		cout << "Invalid policy!";
 		throw 0;
 		break;
 	}
-	std::cout << "running result: " << std::endl;
+	cout << "running result: " << endl;
 	scheduler.Go();
 
 	return 0;
