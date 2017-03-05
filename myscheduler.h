@@ -19,11 +19,6 @@ struct ThreadsStatus {
 	bool isRunning;						// true if thread is currently being processed by a cpu
 };
 
-struct CPUStatus {
-	unsigned int id;					// id of CPU
-	bool isBusy;						// is there thread is processing in this CPU
-	unsigned int processedTid;			// if there is, what is the id of the thread
-};
 
 class MyScheduler : public Scheduler {
 public:
@@ -32,12 +27,12 @@ public:
 	bool Dispatch() override; //Function to implement scheduling policy and to keep a check on processed threads
 	void CreateThread(int arriving_time, int remaining_time, int priority, int tid) override; //Function to create threads and insert them in student defined data structure
 
-
-	// variables used for storing threads to be schedeuled by CPUs
-	vector<ThreadsStatus> threadVector;
-	vector<ThreadsStatus> orderedVector;
+	// variables
+	vector<ThreadsStatus> threadVector;			// vector to store all threads
+	vector<ThreadsStatus> orderedVector;		// vector to store ordered threads
 	unsigned int num_scheduledCPU;				// used for checking available cpu
 
 	// additional functions
-	void push_to_ordered_list(ThreadsStatus *thread);	//aids in preemptions
+	void push_to_ordered_list(ThreadsStatus *thread);
+	void clear_CPU();
 };
