@@ -8,7 +8,8 @@
 	Due: 3/5/2017 11:59pm
 
 	Description: In this project we implement a schduler for a n-processor architecture.
-		It would work for four policies, FCFS, SRTFwoP, SRTFwP, and PBSwP. 
+		It will work for four policies, FCFS, SRTFwoP, SRTFwP, and PBSwP. 
+		
 */
 
 #include "myscheduler.h"
@@ -49,16 +50,10 @@ void MyScheduler::CreateThread(int arriving_time, int remaining_time, int priori
 
 	// insert thread into the thread vector based on arrival time
 	auto it = threadVector.begin();
-
 	while (it != threadVector.end() && it->thread->arriving_time <= thread->thread->arriving_time) {
 		it++;
 	}
-
 	threadVector.insert(it, 1, *thread);
-	// send message
-	//cout << "*** Thread #" << tid << " has been created. \n" << "\tArrival: " << arriving_time << "\tRemaining: " << remaining_time << "\tPriority: " << priority << endl << endl;
-	
-
 	return;
 }
 
@@ -68,17 +63,10 @@ bool MyScheduler::Dispatch()
 	// iterate through thread vector and schedule threads
 	while (!threadVector.empty() && threadVector[0].thread->arriving_time <= timer) {
 		push_to_ordered_list(&threadVector[0]);
-		//cout << "	*** Thread #" << threadVector[0].thread->tid << " has been scheduled.\n";
 		threadVector.erase(threadVector.begin());
-		// send message
-		//cout << "*** Thread #" << tid << " has been created. \n" << "\tArrival: " << arriving_time << "\tRemaining: " << remaining_time << "\tPriority: " << priority << endl << endl;
-		
 		cout << endl;
 	}
-
-	//Todo: Check and remove finished threads
-	//Todo: Check if all the threads are finished; if so, return false
-
+	//implementation depends on policy given
 	switch (policy)	{
 
 	case FCFS: {		//First Come First Serve
@@ -87,7 +75,6 @@ bool MyScheduler::Dispatch()
 			// an empty CPU is found
 			if (CPUs[i] == NULL || CPUs[i]->remaining_time == 0) {
 				auto it = orderedVector.begin();
-
 				while (it != orderedVector.end() && (it->thread->remaining_time == 0 || it->isRunning)) {
 					// remove from ordered vector if thread has been processed
 					if (it->thread->remaining_time == 0) {
@@ -103,6 +90,7 @@ bool MyScheduler::Dispatch()
 					CPUs[i] = it->thread;
 					it->isRunning = true;
 				}
+				//if 'it' is at its end, leave the CPU free
 				else {
 					CPUs[i] = NULL;
 				}
@@ -132,6 +120,7 @@ bool MyScheduler::Dispatch()
 					CPUs[i] = it->thread;
 					it->isRunning = true;
 				}
+				//if 'it' is at its end, leave the CPU free
 				else {
 					CPUs[i] = NULL;
 				}
@@ -179,6 +168,7 @@ bool MyScheduler::Dispatch()
 					}
 				}
 			}
+			//if 'it' is at its end, leave the CPU free
 			else {
 				CPUs[i] = NULL;
 			}
@@ -202,12 +192,13 @@ bool MyScheduler::Dispatch()
 			while (it != orderedVector.end() && it->thread->remaining_time == 0) {
 				it = orderedVector.erase(it);
 			}
-
+			// assign processor to next available thread in ordered vector;
 			if (it != orderedVector.end()) {
 				CPUs[i] = it->thread;
 				it->isRunning = true;
 				it++;
 			}
+			//if 'it' is at its end, leave the CPU free
 			else {
 				CPUs[i] = NULL;
 			}
@@ -232,18 +223,15 @@ bool MyScheduler::Dispatch()
 
 // add the new thread into the ordered vector 
 void MyScheduler::push_to_ordered_list(ThreadsStatus *thread) {
-	// find a proper place in the vector to push the thread based on policyv
+	// find a proper place in the vector to push the thread based on policy
 	// vector head gets to process first, followed by the second item, etc.
-
 	auto it = orderedVector.begin();
-
 	switch (policy)
 	{
 	case FCFS:		//First Come First Serve
 		while (it != orderedVector.end() && (it->thread->arriving_time <= thread->thread->arriving_time || it->isRunning)) {
 			it++;
 		}
-
 		orderedVector.insert(it, *thread);
 		break;
 	case STRFwoP: {	//Shortest Time Remaining First, without preemption
@@ -251,7 +239,6 @@ void MyScheduler::push_to_ordered_list(ThreadsStatus *thread) {
 		while (it != orderedVector.end() && (it->thread->remaining_time <= thread->thread->remaining_time || it->isRunning)) {
 			it++;
 		}
-
 		orderedVector.insert(it, *thread);
 		break;
 	}
@@ -262,7 +249,6 @@ void MyScheduler::push_to_ordered_list(ThreadsStatus *thread) {
 			&& it->thread->remaining_time + it->thread->arriving_time <= thread->thread->remaining_time + thread->thread->arriving_time) {
 			it++;
 		}
-
 		orderedVector.insert(it, *thread);
 
 		/* // check the vector order for debug
